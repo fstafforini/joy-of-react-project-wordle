@@ -5,6 +5,8 @@ import GuessInput from "../GuessInput/GuessInput";
 import GuessList from "../GuessList/GuessList";
 import EndBanner from "../EndBanner/EndBanner";
 import { DEBUG } from "../../constants";
+import Keyboard from "../Keyboard";
+import { checkGuess } from "../../game-helpers";
 
 // Pick a random word on every pageload.
 const answer = sample(WORDS);
@@ -13,18 +15,29 @@ console.info({ answer });
 
 function Game() {
   const [guesses, setGuesses] = useState([]);
-  const addGuess = ({ guess }) =>
-    setGuesses((prevList) => {
-      const key = prevList.length
-        ? Math.max(...prevList.map((item) => item.key)) + 1
+  const [keyboardState, setKeyboardState] = useState(initialKeyboardState());
+  const addGuess = ({ guess }) => {
+    setGuesses((prevState) => {
+      const key = prevState.length
+        ? Math.max(...prevState.map((item) => item.key)) + 1
         : 1;
-      const newList = [...prevList, { guess, key }];
+      const newState = [...prevState, { guess, key }];
       if (DEBUG)
         console.log(
-          `setGuesses\n` + `key=${key}\n` + `newList=${JSON.stringify(newList)}`
+          `setGuesses\n` +
+            `key=${key}\n` +
+            `newState=${JSON.stringify(newState)}`
         );
-      return newList;
+      return newState;
     });
+    setKeyboardState((prevState) => {
+      const newState = { ...prevState };
+      for (const key of checkGuess(guess, answer)) {
+        newState[key.letter] = key.status;
+      }
+      return newState;
+    });
+  };
 
   return (
     <>
@@ -38,8 +51,17 @@ function Game() {
         }}
       />
       <EndBanner guesses={guesses} answer={answer} />
+      <Keyboard keyboardState={keyboardState} />
     </>
   );
+}
+
+function initialKeyboardState() {
+  let keyboardState = {};
+  for (let char = 65; char <= 90; char++) {
+    keyboardState[String.fromCharCode(char)] = "";
+  }
+  return keyboardState;
 }
 
 export default Game;
