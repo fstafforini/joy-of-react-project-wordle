@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 
-function GuessInput({ guesses, answer, onSubmit }) {
+function GuessInput({ guesses, answer, onSubmit, guess, setGuess }) {
   const hasWon = guesses.map(({ guess }) => guess).includes(answer);
-  const [guess, setGuess] = useState("");
+
   const inputRef = useRef(null);
   useEffect(() => inputRef.current.focus());
   return (
@@ -11,7 +11,6 @@ function GuessInput({ guesses, answer, onSubmit }) {
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit({ guess });
-        setGuess("");
       }}
     >
       <label htmlFor="guess-input">Enter guess:</label>
